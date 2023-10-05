@@ -1,7 +1,7 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getUsers, getUser, createUser, deleteUser, updateUser  } from '../controllers/users.js';
+import { getUsers, getUser, createUser, deleteUser, updateUser, logActivity  } from '../controllers/users.js';
 
 
 const router = express.Router();
@@ -11,6 +11,7 @@ const router = express.Router();
 router.get('/', getUsers);
 
 router.post('/', createUser);
+router.post('/:id', logActivity);
 
 router.get('/:id', getUser);
 router.delete('/:id', deleteUser);

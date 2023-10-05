@@ -18,6 +18,7 @@ export const getUsers = async (req,res)=>{
     }
 }
 
+// This is LOGIN function
 export const getUser = async (req, res) => {
     const id = req.params.id;
 
@@ -32,26 +33,43 @@ export const getUser = async (req, res) => {
             return res.status(404).json({message: `cannot find user with ID ${id}`});
         }
 
+        console.log(`Successful login: user ID: ${id}`);
         res.status(200).json(user);
     } catch (error) {
         console.log(error.message);
         res.status(500).json({message: error.message});
     }
 };
+// This is the register feature
 export const createUser = async (req, res) => {
-    try {
-        const { firstName, lastName } = req.body;
+    async function userExists(login) {
+        const response = await axios.post('action/findOne', {
+            ...DB_DATA,
+            filter: {"login": login} // This is the filter to match the required ID
+        });
+        const user = response.data.document;
+        return !!user;
+    }
 
-        // Validate that both firstName and lastName are present
+    try {
+        const { login, password } = req.body;
+
+        // Validate that both login and password are present
         console.log(req.body);
-        if (!firstName || !lastName) {
-            return res.status(400).json({ message: 'Both firstName and lastName are required.' });
+        if (!login || !password) {
+            return res.status(400).json({ message: 'Both login and password are required.' });
         }
+
+        // Check if the email or login is taken
+        if(await userExists(login)){
+            return res.status(409).json({ message: 'User with the provided login already exists. Try to login or request a password change.' });
+        }
+
 
         const newUser = {
             id: uuidv4(),
-            firstName,
-            lastName,
+            login,
+            password,
             activities: []
         };
 
@@ -131,4 +149,23 @@ export const updateUser = async (req, res) => {
     }
 };
 
+// This is function to add an activity to user's activity list
+export const logActivity = async (req, res) => {
+    const id = req.params.id;
+    const updatedData = req.body;
 
+    try {
+        const response = await axios.post(`action/updateOne`, {
+            ...DB_DATA,
+            filter: {
+                "id": id
+            },
+            update: {
+                "$set": updatedData
+            }
+        });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: error.message });
+    }
+};

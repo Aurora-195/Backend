@@ -6,10 +6,10 @@ const userSchema = mongoose.Schema(
         login: {
             type: String,
             required: true,
-            unique: [true, "This login is already taken. Please try to use a different one"],
+            unique: [true, "This login or email is already taken. Please try to use a different one"],
             trim: true,
-            minlength: 3,
-            maxLength: 20
+            minlength: 4,
+            maxLength: 35
         },
         password: {
             type: String,
@@ -18,13 +18,6 @@ const userSchema = mongoose.Schema(
             maxLength: 20,
             trim: true
         },
-        name: {
-            type: String,
-            required: true,
-            minlength: 6,
-            maxLength: 20,
-            trim: true
-        }
     },
 
 
