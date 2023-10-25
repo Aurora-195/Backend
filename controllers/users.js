@@ -1,6 +1,8 @@
 import {v4 as uuidv4} from "uuid";
 import Users from '../models/user.model.js';
 import axios from "axios";
+import bcrypt from 'bcrypt';
+
 const DB_DATA = {
     dataSource: "TimeManagementEcosystem",
     database: "test",
@@ -31,6 +33,14 @@ export const getUser = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({message: `cannot find user with ID ${id}`});
+        }
+
+        const {login, password} = user;
+
+        const passwordMatch = await bcrypt.compare(req.body.password, password);
+
+        if (!passwordMatch) {
+            return res.status(401).json({message: 'Incorrect password'});
         }
 
         console.log(`Successful login: user ID: ${id}`);
@@ -65,11 +75,12 @@ export const createUser = async (req, res) => {
             return res.status(409).json({ message: 'User with the provided login already exists. Try to login or request a password change.' });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = {
             id: uuidv4(),
             login,
-            password,
+            password: hashedPassword,
             activities: []
         };
 
