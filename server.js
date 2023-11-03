@@ -10,7 +10,22 @@ import * as dotenv from "dotenv";
 const app = express();
 const PORT = 5000;
 
-app.use(cors());
+const allowedOrigins = ['http://localhost:5173'];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true, // This is important.
+    methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'], // You can add or remove methods as needed
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/users', usersRoutes);

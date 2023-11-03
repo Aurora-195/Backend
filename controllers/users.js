@@ -9,6 +9,98 @@ const DB_DATA = {
     collection: "users"
 };
 
+const testActivities = [
+    {
+        name: "studying",
+        instances: [
+            {
+                startTime: "2023-10-01T09:00:00Z",
+                endTime: "2023-10-01T11:00:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-02T14:00:00Z",
+                endTime: "2023-10-02T16:30:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-04T08:00:00Z",
+                endTime: "2023-10-04T10:00:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-05T17:00:00Z",
+                endTime: "2023-10-05T19:00:00Z",
+                status: "completed"
+            }
+            // ... additional instances
+        ]
+    },
+    {
+        name: "procrastination",
+        instances: [
+            {
+                startTime: "2023-10-01T12:00:00Z",
+                endTime: "2023-10-01T13:00:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-03T11:00:00Z",
+                endTime: "2023-10-03T12:30:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-05T09:30:00Z",
+                endTime: "2023-10-05T11:00:00Z",
+                status: "completed"
+            }
+            // ... additional instances
+        ]
+    },
+    {
+        name: "meditation",
+        instances: [
+            {
+                startTime: "2023-10-02T07:00:00Z",
+                endTime: "2023-10-02T07:30:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-03T06:45:00Z",
+                endTime: "2023-10-03T07:15:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-06T07:00:00Z",
+                endTime: "2023-10-06T07:30:00Z",
+                status: "completed"
+            }
+            // ... additional instances
+        ]
+    },
+    {
+        name: "sport",
+        instances: [
+            {
+                startTime: "2023-10-01T16:00:00Z",
+                endTime: "2023-10-01T17:30:00Z",
+                status: "completed"
+            },
+            {
+                startTime: "2023-10-03T16:00:00Z",
+                endTime: null,
+                status: "ongoing"
+            },
+            {
+                startTime: "2023-10-05T15:00:00Z",
+                endTime: "2023-10-05T16:00:00Z",
+                status: "completed"
+            }
+            // ... additional instances
+        ]
+    }
+];
+
 export const getUsers = async (req,res)=>{
     try {
         const response = await axios.post(`action/find`, DB_DATA);
@@ -52,6 +144,7 @@ export const getUser = async (req, res) => {
 };
 // This is the register feature
 export const createUser = async (req, res) => {
+    console.log("attempting to create user");
     async function userExists(login) {
         const response = await axios.post('action/findOne', {
             ...DB_DATA,
@@ -81,7 +174,10 @@ export const createUser = async (req, res) => {
             id: uuidv4(),
             login,
             password: hashedPassword,
-            activities: []
+            //activities: []
+            //test activities
+            activities: testActivities
+
         };
 
         const response = await axios.post(`action/insertOne`, {
@@ -95,9 +191,62 @@ export const createUser = async (req, res) => {
             return res.status(400).json({ message: "Failed to create user." });
         }
 
-        res.status(201).json({ ...newUser, _id: insertedId });
+        res.status(200).json({
+            message: "Registration successful.",
+            user: {
+                id: newUser.id,
+                login: newUser.login,
+                activities: newUser.activities
+            }
+        });
     } catch (error) {
         console.error("API request error:", error.response ? error.response.data : error.message);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+export const login = async (req, res) => {
+    console.log("attempting to log in user");
+    async function findUser(login) {
+        const response = await axios.post('action/findOne', {
+            ...DB_DATA,
+            filter: {"login": login} // This is the filter to match the login
+        });
+        return response.data.document;
+    }
+
+    try {
+        const { login, password } = req.body;
+
+        // Validate that both login and password are present
+        if (!login || !password) {
+            return res.status(400).json({ message: 'Both login and password are required.' });
+        }
+
+        // Find the user by login
+        const user = await findUser(login);
+        if (!user) {
+            return res.status(401).json({ message: 'Login failed. User not found.' });
+        }
+
+        // Compare submitted password with stored hashed password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: 'Login failed. Incorrect password.' });
+        }
+        // Here we can assign session tokens if we need it
+
+        // Respond with success and user data (omit sensitive data like password)
+        res.status(200).json({
+            message: "Login successful.",
+            user: {
+                id: user.id,
+                login: user.login,
+                activities: user.activities
+            }
+        });
+    } catch (error) {
+        console.error("Login API request error:", error.response ? error.response.data : error.message);
         return res.status(500).json({ message: "Internal server error." });
     }
 };
