@@ -8,9 +8,9 @@ import usersRoutes from './routes/users.js';
 import * as dotenv from "dotenv";
 
 const app = express();
-const PORT = 5000;
+const PORT = 80;
 
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = ['https://localhost:5173', 'https://auroratime.org'];
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -25,7 +25,9 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
+//app.use(cors(corsOptions));
+
 app.use(express.json());
 
 app.use('/users', usersRoutes);
@@ -51,7 +53,7 @@ async function connect(){
 
 connect().then(r =>{
     console.log("Connected to MongoDB");
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0',() => {
         console.log(`Server started at port ${PORT}`);
     })
 

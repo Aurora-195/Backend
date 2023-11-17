@@ -14,12 +14,6 @@
   "description": "Node app that connects to MongoDB",
   "main": "server.js",
   "type": "module",
-  "scripts": {
-    "start": "nodemon server.js"
-  },
   "author": "Mikhail Fedosenko",
-  "license": "MIT",
-  "devDependencies": {
-    "nodemon": "^2.0.22"
-  }
+  "license": "MIT"
 }
