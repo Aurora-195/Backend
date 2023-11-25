@@ -49,7 +49,7 @@ async function connect(){
 }
 
 
-connect().then(r =>{
+connect().then(() =>{
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {
         console.log(`Server started at port ${PORT}`);

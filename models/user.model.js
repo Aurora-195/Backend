@@ -1,6 +1,21 @@
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from 'uuid';
 
+const activitySchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        unique: [true, "There is already an activity with the same name"]
+    },
+    startTime: {
+        type: Date
+    },
+    endTime: {
+        type: Date
+    }}, {
+        timestamps: true,
+});
+
 const userSchema = mongoose.Schema(
     {
         login: {
@@ -18,9 +33,9 @@ const userSchema = mongoose.Schema(
             maxLength: 20,
             trim: true
         },
-    },
-
-
+        activities: [activitySchema]
+    }
 )
+
 const Users = mongoose.model("Users", userSchema);
 export default Users;
