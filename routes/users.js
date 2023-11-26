@@ -2,7 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getUsers, getUser, createUser, login, deleteUser, updateUser, logActivity  } from '../controllers/users.js';
-import {createActivities, startActivity, endActivity, editActivity, deleteActivity} from '../controllers/activity.controller.js';
+import {createActivities, startActivity, endActivity, editActivity, deleteActivity, getCurrentActivity} from '../controllers/activity.controller.js';
 
 const router = express.Router();
 
@@ -14,13 +14,17 @@ router.post('/register', createUser);
 router.post('/login', login);
 
 // Create, edit, and delete activity
-router.post('/:id/activities', createActivities);
+// works
+router.get('/:id/get-current-activity', getCurrentActivity);
 router.post('/:id/start-activity', startActivity);
 router.post('/:id/end-activity', endActivity);
+
+// doesn't
+router.post('/:id/activities', createActivities);
 router.patch('/:id/edit-activity', editActivity);
 router.delete('/:id/delete-activity', deleteActivity);
-
 router.post('/:id', logActivity);
+
 
 router.get('/:id', getUser);
 router.delete('/:id', deleteUser);

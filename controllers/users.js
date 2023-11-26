@@ -3,7 +3,7 @@ import Users from '../models/user.model.js';
 import axios from "axios";
 import bcrypt from 'bcrypt';
 
-const DB_DATA = {
+export const DB_DATA = {
     dataSource: "TimeManagementEcosystem",
     database: "test",
     collection: "users"
@@ -174,9 +174,9 @@ export const createUser = async (req, res) => {
             id: uuidv4(),
             login,
             password: hashedPassword,
-            //activities: []
+            activities: []
             //test activities
-            activities: testActivities
+            //activities: testActivities
 
         };
 
@@ -329,3 +329,12 @@ export const logActivity = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export async function findUserById(id) {
+    const response = await axios.post('action/findOne', {
+        ...DB_DATA,
+        filter: {"id": id} // This is the filter to match the login
+    });
+    return response.data.document;
+}
+
