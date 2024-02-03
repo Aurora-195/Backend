@@ -9,7 +9,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = 443;
 
 // Determine the directory name of the current module.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
