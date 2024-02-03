@@ -1,5 +1,5 @@
 import {v4 as uuidv4} from "uuid";
-import Users from '../models/user.model.js';
+
 import axios from "axios";
 import bcrypt from 'bcrypt';
 

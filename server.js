@@ -1,37 +1,28 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
-import cors from 'cors';
 import axios from 'axios';
 
 import usersRoutes from './routes/users.js';
 import * as dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;
 
-const allowedOrigins = ['http://localhost:5173'];
+// Determine the directory name of the current module.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true, // This is important.
-    methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'], // You can add or remove methods as needed
-    allowedHeaders: ['Content-Type', 'Authorization']
-};
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../AuroraDeploy/client/dist')));
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/users', usersRoutes);
 
-app.get('/', (req, res) => {
-    res.send('Hello from Homepage');
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../AuroraDeploy/client/dist/index.html'));
 });
 
 

@@ -1,4 +1,4 @@
-import Users from '../models/user.model.js';
+
 import axios from "axios";
 import { findUserById, DB_DATA  } from './users.js';
 
@@ -121,65 +121,7 @@ export const startActivity = async (req, res) => {
     };
   };
 
-  export const editActivity = async(req, res) => {
-    const userId = req.params.id;
-    const activityName = req.body.activityName;
-    const newActivityName = req.body.newActivityName;
 
-    try {
-      const user = await Users.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({message: 'User not found.'});
-      }
-
-      const activity = user.activities.find(act => act.name === activityName);
-
-      if (!activity) {
-        return res.status(404).json({message: 'Activity not found.'});
-      }
-
-      if (!newActivityName) {
-        return res.status(400).json({message: 'New activity name is required.'});
-      }
-
-      activity.name = newActivityName;
-      await user.save();
-
-      res.status(200).json({message: 'Activity edited successfully.'});
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({message: 'Internal server error.'});
-    }
-  };
-
-  export const deleteActivity = async(req, res) => {
-    const userId = req.params.id;
-    const activityName = req.body.activityName;
-
-    try {
-      const user = await Users.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({message: 'User not found'});
-      }
-
-      const activityIndex = user.activities.findIndex(act => act.name === activityName);
-
-
-      if (activityIndex === -1) {
-        return res.status(404).json({message: 'Activity not found.'});
-      }
-
-      user.activities.splice(activityIndex, 1);
-      await user.save();
-
-      res.status(204).json({message: "Activity deleted successfully."});
-    } catch(error) {
-      console.error(error);
-      res.status(500).json({message: 'Internal server error.'});
-    }
-  };
 
 export const getCurrentActivity = async (req, res) => {
   const userId = req.params.id;// Assuming you have user's ID in request
