@@ -3,26 +3,31 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import axios from 'axios';
-
+import fs from "fs";
+import https from "https";
 import usersRoutes from './routes/users.js';
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 8443;
+const PORT = 443;
 
 // Determine the directory name of the current module.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const options = {
+    key: fs.readFileSync('/etc/letsencrypt/live/auroratime.org/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/auroratime.org/fullchain.pem')
+};
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../AuroraDeploy/client/dist')));
+app.use(express.static(path.join(__dirname, '../AuroraWeb/client/dist')));
 
 app.use(express.json());
 
 app.use('/users', usersRoutes);
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../AuroraDeploy/client/dist/index.html'));
+    res.sendFile(path.join(__dirname, '../AuroraWeb/client/dist/index.html'));
 });
 
 
@@ -42,9 +47,9 @@ async function connect(){
 
 connect().then(() =>{
     console.log("Connected to MongoDB");
-    app.listen(PORT, () => {
+    https.createServer(options, app).listen(PORT, () => {
         console.log(`Server started at port ${PORT}`);
-    })
+    });
 
 } ).catch((error)=> {
     console.log(error);
