@@ -309,26 +309,6 @@ export const updateUser = async (req, res) => {
     }
 };
 
-// This is function to add an activity to user's activity list
-export const logActivity = async (req, res) => {
-    const id = req.params.id;
-    const updatedData = req.body;
-
-    try {
-        const response = await axios.post(`action/updateOne`, {
-            ...DB_DATA,
-            filter: {
-                "id": id
-            },
-            update: {
-                "$set": updatedData
-            }
-        });
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ message: error.message });
-    }
-};
 
 export async function findUserById(id) {
     const response = await axios.post('action/findOne', {

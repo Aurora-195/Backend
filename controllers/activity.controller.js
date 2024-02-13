@@ -4,7 +4,7 @@ import { findUserById, DB_DATA  } from './users.js';
 
 export const createActivities = async(req, res) => {
   const userId = req.params.id;
-  const activityNames = req.body.activityNames;
+  const activities = req.body.activities;
 
   try {
     const user = await Users.findById(userId);
@@ -13,8 +13,12 @@ export const createActivities = async(req, res) => {
       return res.status(404).json({message: 'User not found.'});
     }
 
-    if (user.activities.length === 0 && activityNames.length === 4) {
-      user.activities = activityNames.map(name => ({name}));
+    if (user.activities.length === 0 && activities.length === 4) {
+      user.activities = activities.map(activity => ({
+        name: activity.name,
+        color: activity.color,
+        instances: [] // Initially empty
+      }));
       await user.save();
 
       res.status(201).json({message: 'Activities created sucessfully.'});
@@ -23,7 +27,7 @@ export const createActivities = async(req, res) => {
     }
   } catch(error) {
     console.error(error);
-    res.status(500).json({message: 'Internal server error.'});
+    res.status(500).json({message: 'Internal server error: ' + error});
   };
 };
 
@@ -147,4 +151,39 @@ export const getCurrentActivity = async (req, res) => {
 };
 
 
+// This is function to add an activity to user's activity list
+export const logActivity = async (req, res) => {
+  const userId = req.params.id;
+  const newActivityInstance = req.body.activityInstance;
+
+
+  try {
+    const user = await findUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    //Find the activity with the given name, and push the new instance.
+    let activity = user.activities.find(act => act.name === newActivityInstance.name);
+    activity.instances.push(newActivityInstance);
+    console.log(activity);
+
+    // Update the user's activities in the database
+    const updateResponse = await axios.post('action/updateOne', {
+      ...DB_DATA,
+      filter: { "id": userId },
+      update: {
+        "$set": {
+          "activities": user.activities
+        }
+      }
+    });
+
+    res.status(200).json({ message: 'Activity logged successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error: ' + error });
+  }
+};
 
