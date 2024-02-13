@@ -1,4 +1,5 @@
 
+
 import axios from "axios";
 import { findUserById, DB_DATA  } from './users.js';
 
@@ -7,10 +8,10 @@ export const createActivities = async(req, res) => {
   const activities = req.body.activities;
 
   try {
-    const user = await Users.findById(userId);
+    const user = await findUserById(userId);
 
     if (!user) {
-      return res.status(404).json({message: 'User not found.'});
+      return res.status(404).json({message: 'User not found: User ID '+ userId});
     }
 
     if (user.activities.length === 0 && activities.length === 4) {
@@ -19,7 +20,15 @@ export const createActivities = async(req, res) => {
         color: activity.color,
         instances: [] // Initially empty
       }));
-      await user.save();
+      const updateResponse = await axios.post('action/updateOne', {
+      ...DB_DATA,
+      filter: { "id": userId },
+      update: {
+        "$set": {
+          "activities": user.activities
+        }
+      }
+    });
 
       res.status(201).json({message: 'Activities created sucessfully.'});
     } else {
