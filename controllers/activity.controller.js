@@ -164,6 +164,7 @@ export const getCurrentActivity = async (req, res) => {
 export const logActivity = async (req, res) => {
   const userId = req.params.id;
   const newActivityInstance = req.body.activityInstance;
+  const activityName = req.body.name;
 
 
   try {
@@ -174,9 +175,9 @@ export const logActivity = async (req, res) => {
     }
 
     //Find the activity with the given name, and push the new instance.
-    let activity = user.activities.find(act => act.name === newActivityInstance.name);
+    let activity = user.activities.find(act => act.name === activityName);
     activity.instances.push(newActivityInstance);
-    console.log(activity);
+    console.log(`New Activity logged: ${activityName} by user ${user.login}`);
 
     // Update the user's activities in the database
     const updateResponse = await axios.post('action/updateOne', {
