@@ -204,24 +204,35 @@ export const deleteInstance = async (req, res) => {
 
 
   try {
-    const user = await findUserById(userId);
+    const userResponse = await axios.get(`action/findUserById/${userId}`); // Replace with actual endpoint
+    const user = userResponse.data;
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    //Find the activity with the given name
-    let activityIndex = user.activities.find(act => act.name === activityName);
+    // Find the activity with the given name
+    const activity = user.activities.find(act => act.name === activityName);
 
-    if (activityIndex === -1) {
+    if (!activity) {
       return res.status(404).json({ message: 'Activity not found.' });
     }
-    user.activities[activityIndex].instances = user.activities[activityIndex]
-        .instances.filter(instance =>
-        instance.startTime !== startTime || instance.endTime !== endTime
+
+    if (!activity.instances) {
+      return res.status(404).json({ message: 'No instances found for this activity.' });
+    }
+
+    // Filter out the instance to delete
+    const updatedInstances = activity.instances.filter(instance =>
+        !(instance.startTime === startTime && instance.endTime === endTime)
     );
 
-    // Update the user document with the modified activities
+    // Update the specific activity's instances within the user's activities array
+    user.activities = user.activities.map(act =>
+        act.name === activityName ? { ...act, instances: updatedInstances } : act
+    );
+
+    // Update the user document with the modified activities array using Axios
     const updateResponse = await axios.post('action/updateOne', {
       filter: { "id": userId },
       update: {
@@ -231,10 +242,14 @@ export const deleteInstance = async (req, res) => {
       }
     });
 
-    res.status(200).json({ message: 'Activity instance removed successfully.' });
+    if (updateResponse.status === 200) { // Assuming a 200 status for a successful update
+      res.json({ message: 'Activity instance deleted successfully.' });
+    } else {
+      throw new Error('Failed to update user activities');
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error: ' + error });
+    console.error("Failed to delete activity instance:", error);
+    res.status(500).json({ message: 'Failed to delete activity instance.' });
   }
 };
 
