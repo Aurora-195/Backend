@@ -112,8 +112,8 @@ export const getUsers = async (req,res)=>{
     }
 }
 
-// This is LOGIN function
-export const getUser = async (req, res) => {
+
+export const getActivities = async (req, res) => {
     const id = req.params.id;
 
     try {
@@ -127,21 +127,13 @@ export const getUser = async (req, res) => {
             return res.status(404).json({message: `cannot find user with ID ${id}`});
         }
 
-        const {login, password} = user;
-
-        const passwordMatch = await bcrypt.compare(req.body.password, password);
-
-        if (!passwordMatch) {
-            return res.status(401).json({message: 'Incorrect password'});
-        }
-
-        console.log(`Successful login: user ID: ${id}`);
-        res.status(200).json(user);
+        res.status(200).json(user.activities);
     } catch (error) {
         console.log(error.message);
         res.status(500).json({message: error.message});
     }
 };
+
 // This is the register feature
 export const createUser = async (req, res) => {
     console.log("attempting to create user");

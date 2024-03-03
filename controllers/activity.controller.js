@@ -197,3 +197,46 @@ export const logActivity = async (req, res) => {
   }
 };
 
+export const deleteInstance = async (req, res) => {
+  const userId = req.params.id;
+  const {startTime, endTime} = req.body.activityInstance;
+  const activityName = req.body.name;
+
+
+  try {
+    const user = await findUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    //Find the activity with the given name
+    let activityIndex = user.activities.find(act => act.name === activityName);
+
+    if (activityIndex === -1) {
+      return res.status(404).json({ message: 'Activity not found.' });
+    }
+    user.activities[activityIndex].instances = user.activities[activityIndex]
+        .instances.filter(instance =>
+        instance.startTime !== startTime || instance.endTime !== endTime
+    );
+
+    // Update the user document with the modified activities
+    const updateResponse = await axios.post('action/updateOne', {
+      filter: { "id": userId },
+      update: {
+        "$set": {
+          "activities": user.activities
+        }
+      }
+    });
+
+    res.status(200).json({ message: 'Activity instance removed successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error: ' + error });
+  }
+};
+
+
+

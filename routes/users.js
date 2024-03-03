@@ -1,8 +1,8 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getUsers, getUser, createUser, login, deleteUser, updateUser } from '../controllers/users.js';
-import {createActivities, startActivity, endActivity, getCurrentActivity, logActivity} from '../controllers/activity.controller.js';
+import { getUsers, getActivities, createUser, login, deleteUser, updateUser } from '../controllers/users.js';
+import {createActivities, startActivity, endActivity, getCurrentActivity, logActivity, deleteInstance} from '../controllers/activity.controller.js';
 
 const router = express.Router();
 
@@ -20,13 +20,14 @@ router.post('/:id/start-activity', startActivity);
 router.post('/:id/end-activity', endActivity);
 
 // should work
-// Requires user id and activities
 router.post('/:id/createActivities', createActivities);
+
 // Requires user id and activity instance object
 router.post('/:id', logActivity);
 
 
-router.get('/:id', getUser);
+router.get('/:id', getActivities);
+router.post('/:id/deleteActivityInstance', deleteInstance)
 router.delete('/:id', deleteUser);
 
 router.patch('/:id', updateUser);
