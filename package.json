@@ -8,6 +8,7 @@
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "mongoose": "^7.2.2",
+    "simple-oauth": "^0.0.1",
     "uuid": "^9.0.0"
   },
   "name": "mik-f",

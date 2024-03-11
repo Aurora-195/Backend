@@ -204,8 +204,7 @@ export const deleteInstance = async (req, res) => {
 
 
   try {
-    const userResponse = await axios.get(`action/findUserById/${userId}`); // Replace with actual endpoint
-    const user = userResponse.data;
+    const user = await findUserById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });

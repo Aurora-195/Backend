@@ -8,6 +8,11 @@ import https from "https";
 import cors from "cors";
 import usersRoutes from './routes/users.js';
 import * as dotenv from "dotenv";
+import simpleOAuth2 from 'simple-oauth2';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import session from 'express-session';
+
 dotenv.config();
 
 
@@ -24,6 +29,45 @@ const options = {
 
 // Dynamic CORS configuration
 const allowedOrigins = ['http://localhost:5173', 'https://auroratime.org'];
+
+
+// Configure session middleware - required for Passport authentication to persist session info
+app.use(session({
+    secret: process.env.SESSION_SECRET, // Replace 'secret' with a real secret key
+    resave: false,
+    saveUninitialized: true,
+}));
+
+// Passport initialization
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new GoogleStrategy({
+        clientID: process.env.OAUTH_CLIENT_ID,
+        clientSecret: process.env.OAUTH_CLIENT_SECRET,
+        callbackURL: "https://auroratime.org/auth/google/callback"
+    },
+    (accessToken, refreshToken, profile, done) => {
+        // In a production application, you would typically find or create a user in your database here.
+        // For simplicity, we're just passing the profile which includes user information.
+        return done(null, profile);
+    }
+));
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
+// Route to start the OAuth flow
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// OAuth callback route
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+});
 
 app.use(compression());
 
@@ -53,6 +97,7 @@ app.use((req, res, next) => {
     console.log(`Incoming request: ${req.method} ${req.url}`);
     next();
 });
+
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../AuroraWeb/client/dist/index.html'));
