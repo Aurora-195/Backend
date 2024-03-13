@@ -60,13 +60,69 @@ passport.deserializeUser((user, done) => {
 });
 
 // Route to start the OAuth flow
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 // OAuth callback route
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
     // Successful authentication, redirect home.
     res.redirect('/');
 });
+
+app.get('/auth/google', (req, res) => {
+    // Redirect to Google's OAuth 2.0 server
+    const queryParams = new URLSearchParams({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        redirect_uri: 'https://yourserver.com/auth/google/callback',
+        response_type: 'code',
+        scope: 'email profile',
+        access_type: 'offline', // For getting a refresh token
+    }).toString();
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${queryParams}`;
+    res.redirect(googleAuthUrl);
+});
+
+app.get('/auth/google/callback', async (req, res) => {
+    // Google redirects here with an authorization code in req.query.code
+    const code = req.query.code;
+    console.log("auth/google/callback call with code: "+code);
+    // Exchange code for tokens and link user's Google account with your app's account
+    // Send response back to the client, e.g., a success message or redirect
+    const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+        code: code,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: 'https://auroratime.org/auth/google/callback',
+        grant_type: 'authorization_code',
+    });
+    const tokens = tokenResponse.data;
+    console.log("auth/google/callback tokens = : "+ tokens);
+// Here you should link the Google account with the user's account in your app,
+// potentially using the tokens to retrieve user info from Google if necessary.
+
+// Redirect the user back to your app or send a success response.
+
+});
+
+app.post('/webhook', express.json(), (req, res) => {
+    const { queryResult } = req.body;
+    const activityName = queryResult.parameters['ActivityName']; // Ensure parameter names match
+    const duration = queryResult.parameters['duration'];
+    const userId = req.body.originalDetectIntentRequest.payload.user.userId; // This requires account linking
+
+    // Process the activity logging using the activityName and duration
+
+    res.json({
+        fulfillmentText: `Logged ${activityName} for ${duration.amount} ${duration.unit}.`
+    });
+    console.log("webhook call with activityName = "+activityName + ", duration = "+ duration+ ", userId = "+userId);
+});
+
+
+
+// Here you should link the Google account with the user's account in your app,
+// potentially using the tokens to retrieve user info from Google if necessary.
+
+// Redirect the user back to your app or send a success response.
+
 
 app.use(compression());
 
