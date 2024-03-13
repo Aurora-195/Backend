@@ -8,7 +8,6 @@ import https from "https";
 import cors from "cors";
 import usersRoutes from './routes/users.js';
 import * as dotenv from "dotenv";
-import simpleOAuth2 from 'simple-oauth2';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
