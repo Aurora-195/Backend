@@ -104,16 +104,16 @@ app.get('/auth/google/callback', async (req, res) => {
 
 app.post('/webhook', express.json(), (req, res) => {
     const { queryResult } = req.body;
-    const activityName = queryResult.parameters['ActivityName']; // Ensure parameter names match
+    const activityName = queryResult.parameters['activity_name']; // Ensure parameter names match
     const duration = queryResult.parameters['duration'];
-    const userId = req.body.originalDetectIntentRequest.payload.user.userId; // This requires account linking
+    //const userId = req.body.originalDetectIntentRequest.payload.user.userId; // This requires account linking
 
     // Process the activity logging using the activityName and duration
 
     res.json({
         fulfillmentText: `Logged ${activityName} for ${duration.amount} ${duration.unit}.`
     });
-    console.log("webhook call with activityName = "+activityName + ", duration = "+ duration+ ", userId = "+userId);
+    console.log("webhook call with activityName = "+ activityName + ", duration = "+ duration.amount);
 });
 
 
