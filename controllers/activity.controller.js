@@ -256,11 +256,11 @@ export const deleteInstance = async (req, res) => {
 export const editInstance = async (req, res) => {
   const userId = req.params.id;
 
-  const oldActivityInstance = req.body.oldActivityInstance;
-  const oldActivityName = req.body.oldName;
+  const {startTime, endTime} = req.body.oldActivityInstance;
+  const oldActivityName = req.body.oldActivityName;
 
   const newActivityInstance = req.body.newActivityInstance;
-  const newActivityName = req.body.newName;
+  const newActivityName = req.body.newActivityName;
 
 
   try {
