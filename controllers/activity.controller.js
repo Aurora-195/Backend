@@ -233,6 +233,7 @@ export const deleteInstance = async (req, res) => {
 
     // Update the user document with the modified activities array using Axios
     const updateResponse = await axios.post('action/updateOne', {
+      ...DB_DATA,
       filter: { "id": userId },
       update: {
         "$set": {
@@ -249,6 +250,79 @@ export const deleteInstance = async (req, res) => {
   } catch (error) {
     console.error("Failed to delete activity instance:", error);
     res.status(500).json({ message: 'Failed to delete activity instance.' });
+  }
+};
+
+export const editInstance = async (req, res) => {
+  const userId = req.params.id;
+
+  const oldActivityInstance = req.body.oldActivityInstance;
+  const oldActivityName = req.body.oldName;
+
+  const newActivityInstance = req.body.newActivityInstance;
+  const newActivityName = req.body.newName;
+
+
+  try {
+    const user = await findUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // ------------------------
+    // ----- DELETING OLD -----
+    // ------------------------
+    // Find the activity with the given name
+    const oldActivity = user.activities.find(act => act.name === oldActivityName);
+
+    if (!oldActivity) {
+      return res.status(404).json({ message: 'Old activity not found.' });
+    }
+
+    if (!oldActivity.instances) {
+      return res.status(404).json({ message: 'No instances found for this activity.' });
+    }
+
+    // Filter out the instance to delete
+    const updatedInstances = oldActivity.instances.filter(instance =>
+        !(instance.startTime === startTime && instance.endTime === endTime)
+    );
+
+    // Update the specific activity's instances within the user's activities array
+    user.activities = user.activities.map(act =>
+        act.name === oldActivityName ? { ...act, instances: updatedInstances } : act
+    );
+
+    // ----------------------
+    // ----- ADDING NEW -----
+    // ----------------------
+
+    //Find the activity with the given name, and push the new instance.
+    let activity = user.activities.find(act => act.name === newActivityName);
+    activity.instances.push(newActivityInstance);
+    console.log(`New Activity logged: ${newActivityName} by user ${user.login}`);
+
+    // Update the user's activities in the database
+    const updateResponse = await axios.post('action/updateOne', {
+      ...DB_DATA,
+      filter: { "id": userId },
+      update: {
+        "$set": {
+          "activities": user.activities
+        }
+      }
+    });
+
+    if (updateResponse.status === 200) { 
+      res.json({ message: 'Activity instance edited successfully.' });
+    } else {
+      throw new Error('Failed to update user activities');
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error: ' + error });
   }
 };
 
