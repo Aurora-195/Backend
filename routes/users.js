@@ -2,7 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getUsers, getActivities, createUser, login, deleteUser, updateUser } from '../controllers/users.js';
-import {createActivities, startActivity, endActivity, getCurrentActivity, logActivity, deleteInstance} from '../controllers/activity.controller.js';
+import {createActivities, startActivity, endActivity, getCurrentActivity, logActivity, deleteInstance, editInstance} from '../controllers/activity.controller.js';
 
 const router = express.Router();
 
