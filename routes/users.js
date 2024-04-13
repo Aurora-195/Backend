@@ -28,6 +28,7 @@ router.post('/:id', logActivity);
 
 router.get('/:id', getActivities);
 router.post('/:id/deleteActivityInstance', deleteInstance)
+router.post('/:id/editActivityInstance', editInstance)
 router.delete('/:id', deleteUser);
 
 router.patch('/:id', updateUser);
