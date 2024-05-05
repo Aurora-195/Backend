@@ -14,12 +14,12 @@ router.post('/register', createUser);
 router.post('/login', login);
 
 // Create, edit, and delete activity
-// works
+
 router.get('/:id/get-current-activity', getCurrentActivity);
 router.post('/:id/start-activity', startActivity);
 router.post('/:id/end-activity', endActivity);
 
-// should work
+
 router.post('/:id/createActivities', createActivities);
 
 // Requires user id and activity instance object

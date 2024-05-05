@@ -226,12 +226,11 @@ export const deleteInstance = async (req, res) => {
         !(instance.startTime === startTime && instance.endTime === endTime)
     );
 
-    // Update the specific activity's instances within the user's activities array
     user.activities = user.activities.map(act =>
         act.name === activityName ? { ...act, instances: updatedInstances } : act
     );
 
-    // Update the user document with the modified activities array using Axios
+    // Update the user document with the modified activities array
     const updateResponse = await axios.post('action/updateOne', {
       ...DB_DATA,
       filter: { "id": userId },

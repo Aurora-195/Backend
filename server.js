@@ -32,7 +32,7 @@ const allowedOrigins = ['http://localhost:5173', 'https://auroratime.org'];
 
 // Configure session middleware - required for Passport authentication to persist session info
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Replace 'secret' with a real secret key
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
 }));
@@ -46,8 +46,6 @@ passport.use(new GoogleStrategy({
         callbackURL: "https://auroratime.org/auth/google/callback"
     },
     (accessToken, refreshToken, profile, done) => {
-        // In a production application, you would typically find or create a user in your database here.
-        // For simplicity, we're just passing the profile which includes user information.
         return done(null, profile);
     }
 ));
@@ -95,44 +93,30 @@ app.get('/auth/google/callback', async (req, res) => {
     });
     const tokens = tokenResponse.data;
     console.log("auth/google/callback tokens = : "+ tokens);
-// Here you should link the Google account with the user's account in your app,
-// potentially using the tokens to retrieve user info from Google if necessary.
 
-// Redirect the user back to your app or send a success response.
 
 });
 
 app.post('/webhook', express.json(), (req, res) => {
     const { queryResult } = req.body;
-    const activityName = queryResult.parameters['activity_name']; // Ensure parameter names match
+    const activityName = queryResult.parameters['activity_name'];
     const duration = queryResult.parameters['duration'];
-    //const userId = req.body.originalDetectIntentRequest.payload.user.userId; // This requires account linking
 
     // Process the activity logging using the activityName and duration
-
     res.json({
         fulfillmentText: `Logged ${activityName} for ${duration.amount} ${duration.unit}.`
     });
     console.log("webhook call with activityName = "+ activityName + ", duration = "+ duration.amount);
 });
 
-
-
-// Here you should link the Google account with the user's account in your app,
-// potentially using the tokens to retrieve user info from Google if necessary.
-
-// Redirect the user back to your app or send a success response.
-
-
 app.use(compression());
 
 
 app.use(cors({
     origin: function(origin, callback){
-        // Allow requests with no origin (like mobile apps or curl requests)
         if(!origin) return callback(null, true);
         if(allowedOrigins.includes(origin)){
-            return callback(null, true); // Reflect the origin if it's in the allowed list
+            return callback(null, true);
         } else {
             var msg = 'The CORS policy for this site does not ' +
                       'allow access from the specified Origin.';
